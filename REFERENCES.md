@@ -41,6 +41,10 @@ All three X links returned HTTP 403 during automated access on September 29, 202
 - [Apple: AVAssetWriter](https://developer.apple.com/documentation/avfoundation/avassetwriter), writing photo sequences.
 - [FFmpeg filter documentation](https://ffmpeg.org/ffmpeg-filters.html), frame-rate conversion, scaling, and crossfades.
 
+## Native wallpaper integration
+
+The native integration is based on inspection of the local macOS 27.2 Aerial catalog and wallpaper store. These are undocumented implementation details, not Apple-supported extension points. `AVAssetExportSession` remuxes the bundled video into MOV, and `AVAssetImageGenerator` produces its thumbnail. The native system controls lock-screen playback and timing; no frame synchronization is claimed.
+
 ## Rights
 
 Photography is credited to SpaceX based on the supplied source. Video authorship and rights remain unverified. Media and trademarks belong to their respective rights holders; no ownership or redistribution license is claimed by this project. Source attribution should be retained when sharing the files.

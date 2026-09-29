@@ -1,6 +1,6 @@
 # SpaceX Live Wallpaper
 
-A native macOS menu bar app that plays a cinematic SpaceX launch wallpaper behind your desktop icons.
+A native macOS menu bar app that plays a cinematic SpaceX launch wallpaper behind your desktop icons, with an optional matching macOS wallpaper and lock-screen background.
 
 Two animated photographs blend into launch footage and back again. The included film is **4K, 30 fps, 50 seconds, and silent**.
 
@@ -18,11 +18,12 @@ The repository also contains the complete `SpaceX Live Wallpaper.app` bundle and
 
 1. Download and extract the app ZIP.
 2. Move **SpaceX Live Wallpaper.app** to **Applications** and open it.
-3. Use **SpaceX** in the menu bar to pause, resume, preview the film, show the video in Finder, or quit.
+3. At first launch, choose **Apply to Both** to use the same film for the desktop and native macOS wallpaper/screen saver, or **Desktop Only** for app playback alone.
+4. Use **SpaceX** in the menu bar to pause, resume, preview, apply the native wallpaper later, restore your previous system wallpaper, or quit.
 
 The app is locally ad-hoc signed, not Developer ID signed or notarized. macOS may block a downloaded copy. If you choose to allow it, use the per-app **Open Anyway** control in System Settings → Privacy & Security after attempting to open it. Alternatively, build it locally using the instructions below. No system-wide security change is needed.
 
-Quitting immediately reveals your previous wallpaper. The app never changes the system wallpaper preference. To launch at login, add the app yourself under System Settings → General → Login Items after moving it to a permanent location.
+In **Desktop Only** mode, quitting reveals the system wallpaper without changing its settings. After **Apply to Both**, the native SpaceX selection persists when the app quits. Choose **Restore Previous System Wallpaper… → Restore & Quit** to return to the saved selection. If you have since selected another wallpaper, the app refuses to overwrite it. To launch at login, add the app yourself under System Settings → General → Login Items after moving it to a permanent location.
 
 ## Motion
 
@@ -38,10 +39,26 @@ The design keeps the original colors, avoids text overlays and added objects, an
 - Plays locally using AVFoundation, with no account, network connection, or external runtime required.
 - Pauses on sleep, screen lock, an inactive user session, and Low Power Mode.
 - Does not prevent display sleep.
+- Preview playback follows the same menu-bar Pause/Resume controls and power policy.
 - Fills the display, cropping the edges on screens that are not 16:9.
 - Creates one player per connected display and rebuilds them when display configuration changes.
 
-This is a running live wallpaper app. It does not add a time-of-day `.heic` wallpaper to System Settings or replace the lock screen background.
+## Matching desktop and lock screen
+
+**Apply to Desktop & Lock Screen…** registers the same 50-second film in the local macOS Aerial catalog and selects it as a linked wallpaper and screen saver. The app continues looping on the desktop; macOS handles the native background when the desktop player pauses on lock.
+
+This gives both surfaces matching content, **not frame-synchronized playback**. macOS decides whether the lock/password screen animates or shows a still frame. An uninterrupted transition at the exact same video position is not guaranteed. This is not a time-of-day `.heic` wallpaper.
+
+Native integration is limited to **macOS 27**, with the linked, all-displays wallpaper layout. If the catalog is missing or you use separate Space/display choices, the app shows an error and keeps desktop-only playback available. Select one linked Aerial wallpaper in System Settings before retrying. Other macOS versions retain desktop-only playback.
+
+The integration uses an **undocumented local macOS store**, not a public lock-screen API. A system update or catalog refresh may remove the registration; reapply from the menu if needed. It restarts only your user's `WallpaperAerialsExtension` and `WallpaperAgent` after saving, without administrator access.
+
+- Media is copied to `~/Library/Application Support/com.apple.wallpaper/aerials/` with app-owned identifiers. No existing wallpaper asset is replaced.
+- Settings and catalog snapshots are saved under `~/Library/Application Support/SpaceX Live Wallpaper/Backups/` before applying. Reapplying the current SpaceX selection retains the original restore point.
+- Restore reinstates the saved system selection only if the current settings still match the app's selection. Catalog entries, media and backups remain on disk to avoid breaking other references.
+- Allow approximately **80 MB** of additional disk space for the native movie and thumbnail, plus small settings backups. The bundled video is remuxed locally; FFmpeg is not required to apply it.
+
+The local Aerial approach was verified by loading a custom movie in the native wallpaper process on macOS 27.2. This release's store changes and restore behavior are covered by temporary-fixture tests, and its exported MOV is checked for playback. An actual lock/unlock transition with this release has not been visually validated.
 
 ## Video details
 
@@ -82,14 +99,20 @@ The app is compiled for `arm64` with a macOS 13 deployment target. It has been t
 Quit any running copy before executing the integration test. The test temporarily displays the wallpaper and exits automatically.
 
 ```bash
+xcrun swiftc -swift-version 5 -O -target arm64-apple-macosx13.0 \
+  -module-cache-path Build/ModuleCache Sources/NativeWallpaper.swift \
+  Tests/NativeWallpaperTests.swift -o Build/native-wallpaper-tests
+Build/native-wallpaper-tests "$PWD"
 bun Tests/check-video.ts
 xcrun swiftc -O -module-cache-path Build/ModuleCache \
   Sources/PhotoScene.swift Tests/PhotoSceneTests.swift -o Build/photo-scene-tests
 Build/photo-scene-tests "$PWD"
 "./SpaceX Live Wallpaper.app/Contents/MacOS/SpaceXWallpaper" \
   --self-test --ignore-low-power --report "$PWD/Tests/runtime.json"
-codesign --verify --deep --strict "SpaceX Live Wallpaper.app"
+codesign --verify --deep "SpaceX Live Wallpaper.app"
 ```
+
+The native wallpaper tests use temporary stores: matching selections, catalog merging, backups, repeat application, restoration, later user-choice protection, unsupported layouts, MOV export and thumbnail creation. They never change the live system wallpaper.
 
 The runtime checks cover frame decoding, playback progress, looping, pause/resume, desktop window level, mouse passthrough configuration, display rebuilding, and preservation of the system wallpaper setting. Sleep and lock handlers are exercised directly; the test does not actually lock or suspend the Mac. Multiple physical displays have not been tested.
 

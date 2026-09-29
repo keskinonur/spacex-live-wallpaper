@@ -80,6 +80,8 @@ final class DesktopPlayback {
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    let nativeWallpaper = NativeWallpaper()
+    var nativeBusy = false
     var desktops: [DesktopPlayback] = []
     var statusItem: NSStatusItem?
     var pauseItem: NSMenuItem?
@@ -121,6 +123,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 asset = video
                 rebuildDisplays()
                 if selfTest { runSelfTest(duration: duration.seconds) }
+                else if !UserDefaults.standard.bool(forKey: "offeredNativeWallpaper") {
+                    applyNativeWallpaper()
+                }
             } catch { fail(error.localizedDescription) }
         }
     }
@@ -136,7 +141,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(withTitle: "Preview Video…", action: #selector(showPreview), keyEquivalent: "")
         menu.addItem(withTitle: "Show Video in Finder", action: #selector(revealVideo), keyEquivalent: "")
         menu.addItem(.separator())
-        menu.addItem(withTitle: "Quit and Restore Wallpaper", action: #selector(quit), keyEquivalent: "q")
+        menu.addItem(withTitle: "Apply to Desktop & Lock Screen…", action: #selector(applyNativeWallpaper), keyEquivalent: "")
+        menu.addItem(withTitle: "Restore Previous System Wallpaper…", action: #selector(restoreNativeWallpaper), keyEquivalent: "")
+        menu.addItem(.separator())
+        menu.addItem(withTitle: "Quit Desktop Playback", action: #selector(quit), keyEquivalent: "q")
         for item in menu.items where item.action != nil { item.target = self }
         statusItem?.menu = menu
     }
@@ -192,6 +200,52 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func revealVideo() { NSWorkspace.shared.activateFileViewerSelecting([mediaURL]) }
     @objc func quit() { NSApp.terminate(nil) }
 
+    func nativeNotice(_ message: String) {
+        let alert = NSAlert()
+        alert.messageText = "SpaceX Desktop & Lock Screen"
+        alert.informativeText = message
+        NSApp.activate(ignoringOtherApps: true)
+        alert.runModal()
+    }
+
+    @objc func applyNativeWallpaper() {
+        guard !nativeBusy else { return }
+        let alert = NSAlert()
+        alert.messageText = "Use SpaceX on Desktop & Lock Screen?"
+        alert.informativeText = "Apply the same 50-second film to the macOS wallpaper and screen saver. This persists after quitting the app. Your current settings will be backed up. macOS controls lock-screen animation; playback positions are not synchronized. Requires macOS 27 and a linked wallpaper layout."
+        alert.addButton(withTitle: "Apply to Both")
+        alert.addButton(withTitle: "Desktop Only")
+        NSApp.activate(ignoringOtherApps: true)
+        UserDefaults.standard.set(true, forKey: "offeredNativeWallpaper")
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        nativeBusy = true
+        statusItem?.button?.title = "SpaceX · Applying…"
+        Task { @MainActor in
+            defer { nativeBusy = false; statusItem?.button?.title = "SpaceX" }
+            do {
+                try await nativeWallpaper.apply(videoURL: mediaURL)
+                nativeNotice("SpaceX is selected for the system wallpaper and screen saver. The matching lock-screen background is now configured. You can restore your previous system wallpaper from the SpaceX menu.")
+            } catch { nativeNotice(error.localizedDescription) }
+        }
+    }
+
+    @objc func restoreNativeWallpaper() {
+        guard !nativeBusy else { return }
+        let alert = NSAlert()
+        alert.messageText = "Restore Previous System Wallpaper?"
+        alert.informativeText = "Restore the settings saved before SpaceX was applied and stop desktop playback. If you have since chosen another wallpaper, it will be left untouched."
+        alert.addButton(withTitle: "Restore & Quit")
+        alert.addButton(withTitle: "Cancel")
+        NSApp.activate(ignoringOtherApps: true)
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        do { try nativeWallpaper.restore(); NSApp.terminate(nil) }
+        catch { nativeNotice(error.localizedDescription) }
+    }
+
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        nativeBusy ? .terminateCancel : .terminateNow
+    }
+
     @objc func showPreview() {
         if let preview { preview.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true); return }
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1120, height: 630),
@@ -199,12 +253,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window.title = "SpaceX · 29 September 2026"
         window.isReleasedWhenClosed = false
         window.aspectRatio = NSSize(width: 16, height: 9)
-        let view = AVPlayerView()
-        previewPlayer = AVPlayer(url: mediaURL)
-        previewPlayer?.isMuted = true
-        previewPlayer?.preventsDisplaySleepDuringVideoPlayback = false
-        view.player = previewPlayer
-        view.controlsStyle = .floating
+        let player = AVPlayer(url: mediaURL)
+        previewPlayer = player
+        player.isMuted = true
+        player.preventsDisplaySleepDuringVideoPlayback = false
+        // Share the menu's playback policy; AVKit controls can start playback independently.
+        let view = VideoSurface(player: player)
         window.contentView = view
         window.center()
         window.makeKeyAndOrderFront(nil)

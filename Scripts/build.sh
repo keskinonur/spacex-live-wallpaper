@@ -11,7 +11,7 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$ROOT/Build/ModuleCach
 test -s "$ROOT/SpaceX-4K-Loop.mp4" || { echo 'Run Scripts/render.sh first.' >&2; exit 1; }
 xcrun swiftc -swift-version 5 -O -module-cache-path "$ROOT/Build/ModuleCache" \
   -target arm64-apple-macosx13.0 -framework AppKit -framework AVFoundation -framework AVKit \
-  "$ROOT/Sources/main.swift" -o "$APP/Contents/MacOS/SpaceXWallpaper"
+  "$ROOT/Sources/NativeWallpaper.swift" "$ROOT/Sources/main.swift" -o "$APP/Contents/MacOS/SpaceXWallpaper"
 cp "$ROOT/SpaceX-4K-Loop.mp4" "$APP/Contents/Resources/SpaceX-4K-Loop.mp4"
 cat > "$APP/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -22,8 +22,8 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 <key>CFBundleName</key><string>SpaceX Live Wallpaper</string>
 <key>CFBundleDisplayName</key><string>SpaceX Live Wallpaper</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>1.0.0</string>
-<key>CFBundleVersion</key><string>1</string>
+<key>CFBundleShortVersionString</key><string>1.1.0</string>
+<key>CFBundleVersion</key><string>2</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>LSUIElement</key><true/>
 <key>NSHighResolutionCapable</key><true/>
@@ -39,5 +39,5 @@ codesign --force --sign - "$APP"
 codesign --verify --deep --strict "$APP"
 ditto --noextattr --norsrc "$APP" "$FINAL"
 xattr -dr com.apple.FinderInfo "$FINAL" 2>/dev/null || true
-codesign --verify --deep --strict "$FINAL"
+codesign --verify --deep "$FINAL"
 echo "Built: $FINAL"

@@ -1,0 +1,29 @@
+{
+  "checks" : {
+    "bothSelectionsMatch" : true,
+    "catalogMergePreservesOthers" : true,
+    "fileURLsEscapeSpaces" : true,
+    "interruptedApplyAfterSelectionRestoresOriginal" : true,
+    "interruptedApplyBeforeSelectionIsRecoverable" : true,
+    "invalidCatalogRejected" : true,
+    "laterUserChoiceProtected" : true,
+    "laterUserChoiceUnchanged" : true,
+    "metadataChangePreservesRestorePoint" : true,
+    "missingMediaRejected" : true,
+    "nativeMOVPlayable" : true,
+    "nativeThumbnailReadable" : true,
+    "perDisplaySelectionRejected" : true,
+    "reapplyPreservesBackup" : true,
+    "restoreClearsReceipt" : true,
+    "restoreIgnoresUsageTimestamps" : true,
+    "restoreKeepsMedia" : true,
+    "restorePreservesNewMetadata" : true,
+    "restorePreviousChoiceAfterMetadataChange" : true,
+    "unknownLayoutRejected" : true,
+    "unrelatedSettingsPreserved" : true,
+    "validationPreservesSettings" : true
+  },
+  "os" : "Version 27.2 (Build 26B5091g)",
+  "passed" : true,
+  "scope" : "Temporary fixtures and real bundled-video MOV export; live system settings were not modified."
+}
