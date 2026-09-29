@@ -12,6 +12,7 @@ test -s "$ROOT/SpaceX-4K-Loop.mp4" || { echo 'Run Scripts/render.sh first.' >&2;
 xcrun swiftc -swift-version 5 -O -module-cache-path "$ROOT/Build/ModuleCache" \
   -target arm64-apple-macosx13.0 -framework AppKit -framework AVFoundation -framework AVKit \
   "$ROOT/Sources/NativeWallpaper.swift" "$ROOT/Sources/main.swift" -o "$APP/Contents/MacOS/SpaceXWallpaper"
+cp "$ROOT/Resources/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 cp "$ROOT/SpaceX-4K-Loop.mp4" "$APP/Contents/Resources/SpaceX-4K-Loop.mp4"
 cat > "$APP/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -21,15 +22,17 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 <key>CFBundleIdentifier</key><string>local.onur.spacex-live-wallpaper</string>
 <key>CFBundleName</key><string>SpaceX Live Wallpaper</string>
 <key>CFBundleDisplayName</key><string>SpaceX Live Wallpaper</string>
+<key>CFBundleIconFile</key><string>AppIcon</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>1.1.0</string>
-<key>CFBundleVersion</key><string>2</string>
+<key>CFBundleShortVersionString</key><string>1.1.1</string>
+<key>CFBundleVersion</key><string>3</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>LSUIElement</key><true/>
 <key>NSHighResolutionCapable</key><true/>
 <key>NSHumanReadableCopyright</key><string>Photography credited to SpaceX. Video provenance unverified. See REFERENCES.md.</string>
 </dict></plist>
 PLIST
+cp "$ROOT/Resources/ICON-LICENSE.txt" "$APP/Contents/Resources/ICON-LICENSE.txt"
 cp "$ROOT/REFERENCES.md" "$APP/Contents/Resources/REFERENCES.md"
 # Finder/iCloud may attach FinderInfo to a new .app on Desktop.
 # Remove only signing-incompatible metadata from this generated bundle.

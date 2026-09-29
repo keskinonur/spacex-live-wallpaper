@@ -48,3 +48,7 @@ The native integration is based on inspection of the local macOS 27.2 Aerial cat
 ## Rights
 
 Photography is credited to SpaceX based on the supplied source. Video authorship and rights remain unverified. Media and trademarks belong to their respective rights holders; no ownership or redistribution license is claimed by this project. Source attribution should be retained when sharing the files.
+
+## Application icon
+
+The monochrome rocket pictogram comes from [Lucide](https://github.com/lucide-icons/lucide/blob/main/icons/rocket.svg). The flat tile is rendered locally using AppKit. The icon license is included in `Resources/ICON-LICENSE.txt` and in the app bundle.

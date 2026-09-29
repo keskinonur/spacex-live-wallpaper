@@ -9,7 +9,7 @@ Two animated photographs blend into launch footage and back again. The included 
 ## Download
 
 - **[Download the app](https://github.com/keskinonur/spacex-live-wallpaper/releases/latest/download/SpaceX-Live-Wallpaper-macOS-arm64.zip)**: a self-contained Apple Silicon `.app`, including the video.
-- **[Download the 4K video](https://github.com/keskinonur/spacex-live-wallpaper/releases/latest/download/SpaceX-4K-Loop.mp4)**: use it with another video wallpaper player.
+- **[Download the 4K video](https://github.com/keskinonur/spacex-live-wallpaper/releases/download/v1.1.0/SpaceX-4K-Loop.mp4)**: use it with another video wallpaper player.
 - [Release notes and checksums](https://github.com/keskinonur/spacex-live-wallpaper/releases/latest).
 
 The repository also contains the complete `SpaceX Live Wallpaper.app` bundle and `SpaceX-4K-Loop.mp4`. No Git LFS or external media download is needed after cloning.
@@ -71,6 +71,10 @@ The local Aerial approach was verified by loading a custom movie in the native w
 | Source video | 1920 × 1080, approximately 59.94 fps |
 
 The video segment is upscaled from 1080p; the 4K output does not add captured detail. The first 20 seconds of the supplied clip are used, excluding its ending fade to black. Source files are preserved in `Media/`.
+
+## Application icon
+
+A monochrome rocket pictogram on a flat neutral tile is used in Finder and app dialogs. `Resources/AppIcon.svg` is the source; `bash Scripts/build-icon.sh` renders the PNG and macOS ICNS package using the native toolchain. Icon attribution and its license are included in [REFERENCES.md](REFERENCES.md).
 
 ## Build
 

@@ -105,6 +105,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         NSApp.setActivationPolicy(.accessory)
+        if let iconURL = Bundle.main.url(forResource: "AppIcon", withExtension: "icns") {
+            NSApp.applicationIconImage = NSImage(contentsOf: iconURL)
+        }
         guard Bundle.main.url(forResource: "SpaceX-4K-Loop", withExtension: "mp4") != nil else {
             fail("The video is missing from the application bundle.")
             return
