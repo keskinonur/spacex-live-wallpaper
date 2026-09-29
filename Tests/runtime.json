@@ -1,0 +1,24 @@
+{
+  "checks" : {
+    "advances" : true,
+    "allLayersDecoded" : true,
+    "behindDesktopIcons" : true,
+    "ignoresMouse" : true,
+    "lockPauses" : true,
+    "loopsAtEnd" : true,
+    "mutedAllowsSleep" : true,
+    "noPlayerErrors" : true,
+    "oneWindowPerScreen" : true,
+    "originalWallpaperPreserved" : true,
+    "pause" : true,
+    "previewHonorsPause" : true,
+    "previewResumes" : true,
+    "rebuildDisplays" : true,
+    "resume" : true,
+    "sleepPauses" : true
+  },
+  "duration" : 50,
+  "os" : "Version 27.2 (Build 26B5091g)",
+  "passed" : true,
+  "screens" : 1
+}

@@ -1,0 +1,15 @@
+{
+  "checks" : {
+    "close.cloudsAnimate" : true,
+    "close.deterministic" : true,
+    "close.groundProtected" : true,
+    "close.smoothFrameStep" : true,
+    "close.subjectProtected" : true,
+    "wide.cloudsAnimate" : true,
+    "wide.deterministic" : true,
+    "wide.groundProtected" : true,
+    "wide.smoothFrameStep" : true,
+    "wide.subjectProtected" : true
+  },
+  "passed" : true
+}
